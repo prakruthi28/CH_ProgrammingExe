@@ -19,30 +19,43 @@ public class avgProcedureCost {
    * @author Prakruthi Nagaraj
    */
 
-  static float getAverageCostForProcedure(String procedureCosts, String procedureCode) {
-    String[] allProceduresArr = procedureCosts.split(":|\\|\\|");
-    System.out.println(Arrays.toString(allProceduresArr));
-    Map<String, Float> map = new HashMap<String, Float>();
-    int count = 1;
-    float avgPrice = 0;
-    float price = 0; // When you operate on two integers, Java will produce an integer result. Hence
-                     // price is float
+    public static float getAverageCostForProcedure(String procedureCosts, String targetProcedureCode) {
+        float avgPrice = 0;
+        Map<String, Integer> procedureCodeMap = new HashMap<>();
+        int count = 0;
 
-    for (int i = 0; i < allProceduresArr.length; i++) {
-      if (allProceduresArr[i].equals(procedureCode) && map.get(allProceduresArr[i]) == null) {
-        map.put(allProceduresArr[i], Float.parseFloat(allProceduresArr[i + 1]));
-        price = Integer.parseInt(allProceduresArr[i + 1]);
-        i++;
-      } else if (map.get(allProceduresArr[i]) != null) {
-        price = map.get(allProceduresArr[i]) + Integer.parseInt(allProceduresArr[i + 1]);
-        map.put(allProceduresArr[i], price);
-        count++;
-        i++;
-      } else {
-        i++;
-      }
+        String[] procedurePrices = procedureCosts.split(Pattern.quote("||"));
+        for (String procedurePrice : procedurePrices) {
+            if(!procedurePrice.contains(":")){
+                System.out.println("Malformed Procedure price. Please double check your procedure input.");
+                return 0;
+            }
+            String[] procedurePriceSplit = procedurePrice.split(":");
+            String procedureCode = procedurePriceSplit[0];
+            int price;
+            try {
+                price = Integer.parseInt(procedurePriceSplit[1]);
+            } catch (NumberFormatException ex) {
+                System.out.println("Malformed Procedure price. Please double check your procedure input.");
+                return 0;
+            }
+
+            if (procedureCode.equals(targetProcedureCode)) {
+                count++;
+            }
+            if (!procedureCodeMap.containsKey(procedureCode)) {
+                procedureCodeMap.put(procedureCode, price);
+            } else {
+                int currentProcedurePrice = procedureCodeMap.get(procedureCode) + price;
+                procedureCodeMap.put(procedureCode, currentProcedurePrice);
+            }
+        }
+
+        if (count == 0) {
+            System.out.println("Target procedure code not found! Please double check your procedure input.");
+            return 0;
+        }else {
+            return (float)procedureCodeMap.get(targetProcedureCode) / count;
+        }
     }
-    avgPrice = price / count;
-    return avgPrice;
-  }
 }
